@@ -13,7 +13,7 @@ import { nb } from "date-fns/locale"
 const App = () => {
   const [date, setDate] = useState(new Date())
   const [title, setTitle] = useState("")
-  const [secondaryTitle, setSecondaryTitle] = useState("Habitat 17:00")
+  const [secondaryTitle, setSecondaryTitle] = useState("")
   const [selectedTemplateId, setSelectedTemplateId] = useState(templates[0].id)
 
   const templateArguments: TemplateArguments = {
@@ -81,7 +81,7 @@ const App = () => {
                       mode="single"
                       selected={date}
                       onSelect={(date) => date && setDate(date)}
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) => date.setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)}
                     />
                   </CardContent>
                 </Card>
