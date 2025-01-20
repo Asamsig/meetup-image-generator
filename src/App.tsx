@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator"
 import { TemplateArguments } from "./types"
 import { nb } from "date-fns/locale"
+import { format } from "date-fns"
 
 const App = () => {
   const [date, setDate] = useState(new Date())
@@ -22,7 +23,7 @@ const App = () => {
     day: date.toLocaleString("no-NO", { weekday: "long" }).toUpperCase(),
     title,
     secondaryTitle,
-    date: date.toISOString(),
+    date: format(date, "yyyy-MM-dd"),
   }
 
   const selectedTemplate = templates.find((t) => t.id === selectedTemplateId)!
