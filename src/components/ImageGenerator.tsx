@@ -2,8 +2,8 @@ import { useState } from "react"
 import { SvgConverter } from "./SvgConverter"
 import * as htmlToImage from "html-to-image"
 import { Button } from "./ui/button"
-import { TemplateArguments } from "../types"
-import { TemplateOption } from "@/templates"
+import type { TemplateArguments } from "../types"
+import type { TemplateOption } from "@/templates"
 
 type ImageGeneratorProps = {
   template: TemplateOption
