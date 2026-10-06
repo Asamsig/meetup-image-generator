@@ -23,3 +23,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local pnpm settings, e.g. allowBuilds for pnpm 11. Vercel installs with pnpm 9, which rejects a workspace file without packages.
+pnpm-workspace.yaml
