@@ -1,15 +1,24 @@
-import { useRef } from "react"
+import { Fragment, useRef } from "react"
 import { ImagePlus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { availableWeights, closestWeight, fontFamilies, weightNames } from "@/lib/fonts"
 import { fileToLogo } from "@/lib/image"
-import type { Template, TemplateColors } from "@/templates"
+import { fieldFont, type FieldFont, type Template, type TemplateColors, type TextField } from "@/templates"
 
 const LOGO_BOX = { x: 40, y: 40, width: 600, height: 320 }
 
 const colorFields: { key: keyof TemplateColors; label: string }[] = [
   { key: "background", label: "Background" },
+  { key: "title", label: "Title" },
+  { key: "subtitle", label: "Subtitle" },
+  { key: "date", label: "Date" },
+  { key: "footer", label: "Footer" },
+]
+
+const fontFields: { key: TextField; label: string }[] = [
   { key: "title", label: "Title" },
   { key: "subtitle", label: "Subtitle" },
   { key: "date", label: "Date" },
@@ -34,6 +43,8 @@ export const TemplateEditor = ({ template, onChange, onClose }: TemplateEditorPr
       alert("Could not read the image.")
     }
   }
+
+  const setFont = (field: TextField, font: FieldFont) => onChange({ ...template, fonts: { ...template.fonts, [field]: font } })
 
   return (
     <div className="space-y-4 rounded-md border p-4">
@@ -62,6 +73,47 @@ export const TemplateEditor = ({ template, onChange, onClose }: TemplateEditorPr
             />
           </div>
         ))}
+      </div>
+
+      <div className="space-y-2">
+        <Label>Fonts</Label>
+        <div className="grid grid-cols-[auto_1fr_1fr] items-center gap-2">
+          {fontFields.map(({ key, label }) => {
+            const font = fieldFont(template, key)
+            return (
+              <Fragment key={key}>
+                <span className="pr-2 text-sm">{label}</span>
+                <Select
+                  value={font.family}
+                  onValueChange={(family) => setFont(key, { ...font, family, weight: closestWeight(family, font.weight) })}
+                >
+                  <SelectTrigger aria-label={`${label} font`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fontFamilies.map((family) => (
+                      <SelectItem key={family.id} value={family.id}>
+                        {family.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={String(font.weight)} onValueChange={(weight) => setFont(key, { ...font, weight: Number(weight) })}>
+                  <SelectTrigger aria-label={`${label} weight`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableWeights(font.family).map((weight) => (
+                      <SelectItem key={weight} value={String(weight)}>
+                        {weightNames[weight]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Fragment>
+            )
+          })}
+        </div>
       </div>
 
       <div className="space-y-2">

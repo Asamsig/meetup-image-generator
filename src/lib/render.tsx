@@ -1,29 +1,16 @@
-import satori, { type Font } from "satori"
-import manrope400 from "@fontsource/manrope/files/manrope-latin-400-normal.woff?url"
-import manrope700 from "@fontsource/manrope/files/manrope-latin-700-normal.woff?url"
+import satori from "satori"
 import { Poster, POSTER_HEIGHT, POSTER_WIDTH, type PosterContent } from "@/components/Poster"
-import type { Template } from "@/templates"
+import { loadFonts } from "@/lib/fonts"
+import { fieldFont, type Template, type TextField } from "@/templates"
 
-const loadFont = async (url: string, weight: Font["weight"]): Promise<Font> => ({
-  name: "Manrope",
-  data: await fetch(url).then((res) => res.arrayBuffer()),
-  weight,
-  style: "normal",
-})
-
-let fontsPromise: Promise<Font[]> | undefined
-
-const loadFonts = () => {
-  fontsPromise ??= Promise.all([loadFont(manrope400, 400), loadFont(manrope700, 700)])
-  return fontsPromise
-}
+const fields: TextField[] = ["date", "title", "subtitle", "footer"]
 
 /** Renders the poster to a self-contained SVG string, with all text converted to paths. */
 export const renderPosterSvg = async (template: Template, content: PosterContent) =>
   satori(<Poster template={template} content={content} />, {
     width: POSTER_WIDTH,
     height: POSTER_HEIGHT,
-    fonts: await loadFonts(),
+    fonts: await loadFonts(fields.map((field) => fieldFont(template, field))),
   })
 
 export const svgToJpeg = async (svg: string): Promise<Blob> => {

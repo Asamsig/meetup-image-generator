@@ -14,11 +14,21 @@ export type TemplateColors = {
   footer: string
 }
 
+export type TextField = "date" | "title" | "subtitle" | "footer"
+
+export type FieldFont = {
+  /** One of `fontFamilies` in src/lib/fonts.ts */
+  family: string
+  weight: number
+}
+
 export type Template = {
   id: string
   name: string
   colors: TemplateColors
   logos: TemplateLogo[]
+  /** Falls back to `defaultFonts` for fields that aren't set. */
+  fonts?: Partial<Record<TextField, FieldFont>>
   /** Small text in the bottom left corner, e.g. a website. */
   footer?: string
   /** Colored bands along the bottom edge, drawn left to right. */

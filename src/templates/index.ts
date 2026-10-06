@@ -1,9 +1,18 @@
 import bartjsLogo from "@/assets/logos/bartjs.png?inline"
 import javabinLogo from "@/assets/logos/javabin.jpg?inline"
 import nnugLogo from "@/assets/logos/nnug.png?inline"
-import type { Template } from "./types"
+import type { FieldFont, Template, TextField } from "./types"
 
-export type { Template, TemplateColors, TemplateLogo } from "./types"
+export type { FieldFont, Template, TemplateColors, TemplateLogo, TextField } from "./types"
+
+export const defaultFonts: Record<TextField, FieldFont> = {
+  date: { family: "manrope", weight: 700 },
+  title: { family: "manrope", weight: 400 },
+  subtitle: { family: "manrope", weight: 400 },
+  footer: { family: "arimo", weight: 400 },
+}
+
+export const fieldFont = (template: Template, field: TextField) => template.fonts?.[field] ?? defaultFonts[field]
 
 const brand = {
   javabin: "#2a9cde",
