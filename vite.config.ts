@@ -5,8 +5,10 @@ import { defineConfig } from "vite"
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+    alias: [
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+      // See src/lib/harfbuzz.ts
+      { find: /^harfbuzzjs$/, replacement: path.resolve(__dirname, "./src/lib/harfbuzz.ts") },
+    ],
   },
 })

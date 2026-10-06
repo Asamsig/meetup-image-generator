@@ -1,32 +1,24 @@
-import { useState } from "react"
-import { templates } from "./templates"
-import { ImageGenerator } from "./components/ImageGenerator"
+import { useMemo, useState } from "react"
+import { nb } from "date-fns/locale"
+import { builtInTemplates } from "./templates"
+import { PosterPreview } from "./components/PosterPreview"
 import { Calendar } from "@/components/ui/calendar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { TemplateArguments } from "./types"
-import { nb } from "date-fns/locale"
-import { format } from "date-fns"
 
 const App = () => {
+  const [templateId, setTemplateId] = useState(builtInTemplates[0].id)
+  const template = builtInTemplates.find((t) => t.id === templateId)!
+
   const [date, setDate] = useState(new Date())
   const [title, setTitle] = useState("")
-  const [secondaryTitle, setSecondaryTitle] = useState("")
-  const [selectedTemplateId, setSelectedTemplateId] = useState(templates[0].id)
+  const [subtitle, setSubtitle] = useState("")
 
-  const templateArguments: TemplateArguments = {
-    dateDay: String(date.getDate()).padStart(2, "0"),
-    dateMonth: String(date.getMonth() + 1).padStart(2, "0"),
-    day: date.toLocaleString("no-NO", { weekday: "long" }).toUpperCase(),
-    title,
-    secondaryTitle,
-    date: format(date, "yyyy-MM-dd"),
-  }
-
-  const selectedTemplate = templates.find((t) => t.id === selectedTemplateId)!
+  const content = useMemo(() => ({ title, subtitle, date }), [title, subtitle, date])
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -38,7 +30,7 @@ const App = () => {
 
         <Separator />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:[&>*:last-child]:col-start-2 md:[&>*:last-child]:row-start-1">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:[&>*:last-child]:col-start-2 md:[&>*:last-child]:row-start-1">
           <Card>
             <CardHeader>
               <CardTitle>Configuration</CardTitle>
@@ -47,12 +39,12 @@ const App = () => {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label>Template</Label>
-                <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
+                <Select value={template.id} onValueChange={setTemplateId}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {templates.map((template) => (
+                    {builtInTemplates.map((template) => (
                       <SelectItem key={template.id} value={template.id}>
                         {template.name}
                       </SelectItem>
@@ -62,13 +54,14 @@ const App = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Title</Label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+                <Label htmlFor="title">Title</Label>
+                <Textarea id="title" rows={2} value={title} onChange={(e) => setTitle(e.target.value)} />
+                <p className="text-sm text-muted-foreground">Long titles wrap automatically. Press Enter to force a line break.</p>
               </div>
 
               <div className="space-y-2">
-                <Label>Subtitle</Label>
-                <Input value={secondaryTitle} onChange={(e) => setSecondaryTitle(e.target.value)} />
+                <Label htmlFor="subtitle">Subtitle</Label>
+                <Input id="subtitle" placeholder="Venue 17.00" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} />
               </div>
 
               <div className="space-y-2">
@@ -82,7 +75,7 @@ const App = () => {
                       mode="single"
                       selected={date}
                       onSelect={(date) => date && setDate(date)}
-                      disabled={(date) => date.setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)}
+                      disabled={{ before: new Date() }}
                     />
                   </CardContent>
                 </Card>
@@ -90,13 +83,13 @@ const App = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="md:sticky md:top-8 md:self-start">
             <CardHeader>
               <CardTitle>Preview</CardTitle>
               <CardDescription>Generated image preview and download</CardDescription>
             </CardHeader>
             <CardContent>
-              <ImageGenerator template={selectedTemplate} templateArguments={templateArguments} />
+              <PosterPreview template={template} content={content} />
             </CardContent>
           </Card>
         </div>
