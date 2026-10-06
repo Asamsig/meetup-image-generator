@@ -121,22 +121,22 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="min-h-screen bg-background p-4 sm:p-8">
+      <div className="mx-auto max-w-7xl space-y-6 sm:space-y-8">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">Meetup Image Generator</h1>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Meetup Image Generator</h1>
           <p className="text-muted-foreground">Create beautiful meetup promotional images with ease.</p>
         </div>
 
         <Separator />
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:[&>*:last-child]:col-start-2 md:[&>*:last-child]:row-start-1">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 md:[&>*:last-child]:col-start-2 md:[&>*:last-child]:row-start-1">
           <Card>
-            <CardHeader>
+            <CardHeader className="p-4 sm:p-6">
               <CardTitle>Configuration</CardTitle>
               <CardDescription>Customize your meetup image settings</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="space-y-2">
                 <Label>Template</Label>
                 <TemplatePicker
@@ -177,29 +177,27 @@ const App = () => {
 
               <div className="space-y-2">
                 <Label>Date</Label>
-                <Card className="flex justify-center">
-                  <CardContent className="pt-6">
-                    <Calendar
-                      showWeekNumber
-                      locale={nb}
-                      weekStartsOn={1}
-                      mode="single"
-                      selected={date}
-                      onSelect={(date) => date && setDate(date)}
-                      disabled={{ before: new Date() }}
-                    />
-                  </CardContent>
-                </Card>
+                <div className="flex justify-center rounded-xl border">
+                  <Calendar
+                    showWeekNumber
+                    locale={nb}
+                    weekStartsOn={1}
+                    mode="single"
+                    selected={date}
+                    onSelect={(date) => date && setDate(date)}
+                    disabled={{ before: new Date() }}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="md:sticky md:top-8 md:self-start">
-            <CardHeader>
+            <CardHeader className="p-4 sm:p-6">
               <CardTitle>Preview</CardTitle>
               <CardDescription>Generated image preview and download</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
               <PosterPreview template={template} content={content} />
             </CardContent>
           </Card>

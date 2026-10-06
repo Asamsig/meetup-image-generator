@@ -41,7 +41,7 @@ export const TemplatePicker = ({
   onEdit,
   onDelete,
 }: TemplatePickerProps) => (
-  <div className="flex gap-2">
+  <div className="flex flex-wrap gap-2 sm:flex-nowrap">
     <Select
       value={selected.id}
       onValueChange={(value) => {
@@ -50,7 +50,7 @@ export const TemplatePicker = ({
         else onSelect(value)
       }}
     >
-      <SelectTrigger>
+      <SelectTrigger className="min-w-0 basis-full sm:basis-auto">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
