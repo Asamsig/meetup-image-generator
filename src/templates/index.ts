@@ -14,6 +14,13 @@ export const defaultFonts: Record<TextField, FieldFont> = {
 
 export const fieldFont = (template: Template, field: TextField) => template.fonts?.[field] ?? defaultFonts[field]
 
+/** Shared templates refer to these by name instead of embedding the image. */
+export const builtInLogos: Record<string, string> = {
+  javabin: javabinLogo,
+  bartjs: bartjsLogo,
+  nnug: nnugLogo,
+}
+
 const brand = {
   javabin: "#2a9cde",
   bartjs: "#f7df1e",

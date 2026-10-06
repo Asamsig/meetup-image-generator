@@ -1,16 +1,28 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { nb } from "date-fns/locale"
 import { builtInTemplates, type Template } from "./templates"
 import { PosterPreview } from "./components/PosterPreview"
 import { SubtitleField } from "./components/SubtitleField"
 import { TemplateEditor } from "./components/TemplateEditor"
 import { TemplatePicker } from "./components/TemplatePicker"
+import { SharePanel } from "./components/SharePanel"
+import { ImportPanel } from "./components/ImportPanel"
+import { codeFromLink, decodeTemplate, type ImportedTemplate } from "./lib/share"
 import { useLocalStorage } from "./hooks/useLocalStorage"
 import { Calendar } from "@/components/ui/calendar"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+
+/** Compares everything but the id, ignoring key order and unset fields. */
+const sameContent = (a: Template, b: Template) => {
+  const normalize = (template: Template) =>
+    JSON.stringify({ ...template, id: undefined }, (_, value) =>
+      value && typeof value === "object" && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort()) : value,
+    )
+  return normalize(a) === normalize(b)
+}
 
 const App = () => {
   const [customTemplates, setCustomTemplates] = useLocalStorage<Template[]>("custom-templates", [])
@@ -22,7 +34,7 @@ const App = () => {
   const [date, setDate] = useState(new Date())
   const [title, setTitle] = useState("")
   const [subtitle, setSubtitle] = useState(() => subtitleDefaults[template.id] ?? "")
-  const [panel, setPanel] = useState<"edit">()
+  const [panel, setPanel] = useState<"edit" | "share" | "import">()
 
   const content = useMemo(() => ({ title, subtitle, date }), [title, subtitle, date])
 
@@ -49,6 +61,32 @@ const App = () => {
     setSelectedTemplateId(added.id)
     setPanel("edit")
   }
+
+  const importTemplate = ({ template: imported, subtitleDefault }: ImportedTemplate) => {
+    // Opening the same link twice shouldn't give two copies
+    const existing = customTemplates.find((t) => sameContent(t, imported))
+    if (existing) {
+      selectTemplate(existing.id)
+      return
+    }
+    setCustomTemplates((templates) => [...templates, imported])
+    if (subtitleDefault) setSubtitleDefaults((defaults) => ({ ...defaults, [imported.id]: subtitleDefault }))
+    setSubtitle(subtitleDefault ?? "")
+    setSelectedTemplateId(imported.id)
+    setPanel(undefined)
+  }
+
+  // Import templates from share links, e.g. https://…/#template=<code>
+  const importTemplateRef = useRef(importTemplate)
+  importTemplateRef.current = importTemplate
+  useEffect(() => {
+    const code = codeFromLink(location.hash)
+    if (!code) return
+    history.replaceState(null, "", location.pathname + location.search)
+    decodeTemplate(code)
+      .then((imported) => importTemplateRef.current(imported))
+      .catch((error: Error) => alert(`Could not import the shared template. ${error.message}`))
+  }, [])
 
   const createTemplate = () => {
     addTemplate({
@@ -108,6 +146,8 @@ const App = () => {
                   onSelect={selectTemplate}
                   onCreate={createTemplate}
                   onDuplicate={duplicateTemplate}
+                  onImport={() => setPanel("import")}
+                  onShare={() => setPanel(panel === "share" ? undefined : "share")}
                   onEdit={() => setPanel(panel === "edit" ? undefined : "edit")}
                   onDelete={deleteTemplate}
                 />
@@ -116,6 +156,10 @@ const App = () => {
               {panel === "edit" && template.custom && (
                 <TemplateEditor template={template} onChange={updateTemplate} onClose={() => setPanel(undefined)} />
               )}
+              {panel === "share" && template.custom && (
+                <SharePanel template={template} subtitleDefault={subtitleDefaults[template.id]} onClose={() => setPanel(undefined)} />
+              )}
+              {panel === "import" && <ImportPanel onImport={importTemplate} onClose={() => setPanel(undefined)} />}
 
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>

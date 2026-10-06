@@ -29,3 +29,6 @@ These are saved in local storage, so they stay in that browser and don't sync be
 - A default subtitle per template, e.g. "Habitat 17.00". It fills in when you pick the template, unless you've already written your own subtitle.
 - Custom templates, including the font and weight for the title, subtitle, date and footer. Use the + button next to the template picker (or "Create new template" in the list) to start from scratch, or the copy button to start from the selected template. Then change its name, colors, footer and logo.
 
+## Sharing templates
+
+Custom templates can be shared with the share button next to the template picker. The link carries the whole template in the URL fragment (`#template=<code>`), compressed with the browser's `CompressionStream`, so nothing is uploaded anywhere. Opening the link adds the template, or you can paste the link or code into "Import template" in the template list. Built-in logos are referenced by name, so only uploaded logos make the code long. See `src/lib/share.ts`.
