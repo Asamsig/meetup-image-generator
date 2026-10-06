@@ -2,8 +2,9 @@ import { useMemo, useState } from "react"
 import { nb } from "date-fns/locale"
 import { builtInTemplates } from "./templates"
 import { PosterPreview } from "./components/PosterPreview"
+import { SubtitleField } from "./components/SubtitleField"
+import { useLocalStorage } from "./hooks/useLocalStorage"
 import { Calendar } from "@/components/ui/calendar"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
@@ -11,14 +12,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator"
 
 const App = () => {
-  const [templateId, setTemplateId] = useState(builtInTemplates[0].id)
-  const template = builtInTemplates.find((t) => t.id === templateId)!
+  const [selectedTemplateId, setSelectedTemplateId] = useLocalStorage("selected-template", builtInTemplates[0].id)
+  const [subtitleDefaults, setSubtitleDefaults] = useLocalStorage<Record<string, string>>("subtitle-defaults", {})
+
+  const template = builtInTemplates.find((t) => t.id === selectedTemplateId) ?? builtInTemplates[0]
 
   const [date, setDate] = useState(new Date())
   const [title, setTitle] = useState("")
-  const [subtitle, setSubtitle] = useState("")
+  const [subtitle, setSubtitle] = useState(() => subtitleDefaults[template.id] ?? "")
 
   const content = useMemo(() => ({ title, subtitle, date }), [title, subtitle, date])
+
+  const selectTemplate = (id: string) => {
+    // Swap in the new template's default subtitle, unless the user has written something of their own
+    if (subtitle === (subtitleDefaults[template.id] ?? "")) {
+      setSubtitle(subtitleDefaults[id] ?? "")
+    }
+    setSelectedTemplateId(id)
+  }
+
+  const saveSubtitleDefault = (value: string | undefined) => {
+    setSubtitleDefaults((defaults) => {
+      const updated = { ...defaults }
+      if (value === undefined) delete updated[template.id]
+      else updated[template.id] = value
+      return updated
+    })
+  }
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -39,7 +59,7 @@ const App = () => {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label>Template</Label>
-                <Select value={template.id} onValueChange={setTemplateId}>
+                <Select value={template.id} onValueChange={selectTemplate}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -59,10 +79,13 @@ const App = () => {
                 <p className="text-sm text-muted-foreground">Long titles wrap automatically. Press Enter to force a line break.</p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="subtitle">Subtitle</Label>
-                <Input id="subtitle" placeholder="Venue 17.00" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} />
-              </div>
+              <SubtitleField
+                value={subtitle}
+                onChange={setSubtitle}
+                savedDefault={subtitleDefaults[template.id]}
+                onSaveDefault={saveSubtitleDefault}
+                templateName={template.name}
+              />
 
               <div className="space-y-2">
                 <Label>Date</Label>

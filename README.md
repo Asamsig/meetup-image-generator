@@ -17,3 +17,10 @@ pnpm dev
 
 Put the logo in `src/assets/logos/` and add an entry to `builtInTemplates`. Import logos with `?inline` so they're embedded as data URLs.
 
+## Stored in the browser
+
+These are saved in local storage, so they stay in that browser and don't sync between computers:
+
+- The last selected template.
+- A default subtitle per template, e.g. "Habitat 17.00". It fills in when you pick the template, unless you've already written your own subtitle.
+
