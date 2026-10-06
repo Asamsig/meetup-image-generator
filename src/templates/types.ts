@@ -21,4 +21,6 @@ export type Template = {
   logos: TemplateLogo[]
   /** Small text in the bottom left corner, e.g. a website. */
   footer?: string
+  /** Colored bands along the bottom edge, drawn left to right. */
+  stripes?: string[]
 }

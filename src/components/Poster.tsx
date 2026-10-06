@@ -79,6 +79,14 @@ export const Poster = ({ template, content }: PosterProps) => {
       {template.footer && (
         <div style={{ position: "absolute", left: 128, bottom: 64, fontSize: 37, color: colors.footer }}>{template.footer}</div>
       )}
+
+      {template.stripes && (
+        <div style={{ position: "absolute", left: 0, bottom: 0, width: POSTER_WIDTH, height: 24, display: "flex" }}>
+          {template.stripes.map((color, i) => (
+            <div key={i} style={{ flex: 1, backgroundColor: color }} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
