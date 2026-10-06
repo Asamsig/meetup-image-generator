@@ -23,4 +23,5 @@ These are saved in local storage, so they stay in that browser and don't sync be
 
 - The last selected template.
 - A default subtitle per template, e.g. "Habitat 17.00". It fills in when you pick the template, unless you've already written your own subtitle.
+- Custom templates. Use the + button next to the template picker (or "Create new template" in the list) to start from scratch, or the copy button to start from the selected template. Then change its name, colors, footer and logo.
 

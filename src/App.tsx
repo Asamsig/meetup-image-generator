@@ -1,25 +1,28 @@
 import { useMemo, useState } from "react"
 import { nb } from "date-fns/locale"
-import { builtInTemplates } from "./templates"
+import { builtInTemplates, type Template } from "./templates"
 import { PosterPreview } from "./components/PosterPreview"
 import { SubtitleField } from "./components/SubtitleField"
+import { TemplateEditor } from "./components/TemplateEditor"
+import { TemplatePicker } from "./components/TemplatePicker"
 import { useLocalStorage } from "./hooks/useLocalStorage"
 import { Calendar } from "@/components/ui/calendar"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
 const App = () => {
+  const [customTemplates, setCustomTemplates] = useLocalStorage<Template[]>("custom-templates", [])
   const [selectedTemplateId, setSelectedTemplateId] = useLocalStorage("selected-template", builtInTemplates[0].id)
   const [subtitleDefaults, setSubtitleDefaults] = useLocalStorage<Record<string, string>>("subtitle-defaults", {})
 
-  const template = builtInTemplates.find((t) => t.id === selectedTemplateId) ?? builtInTemplates[0]
+  const template = [...builtInTemplates, ...customTemplates].find((t) => t.id === selectedTemplateId) ?? builtInTemplates[0]
 
   const [date, setDate] = useState(new Date())
   const [title, setTitle] = useState("")
   const [subtitle, setSubtitle] = useState(() => subtitleDefaults[template.id] ?? "")
+  const [panel, setPanel] = useState<"edit">()
 
   const content = useMemo(() => ({ title, subtitle, date }), [title, subtitle, date])
 
@@ -29,6 +32,7 @@ const App = () => {
       setSubtitle(subtitleDefaults[id] ?? "")
     }
     setSelectedTemplateId(id)
+    setPanel(undefined)
   }
 
   const saveSubtitleDefault = (value: string | undefined) => {
@@ -38,6 +42,44 @@ const App = () => {
       else updated[template.id] = value
       return updated
     })
+  }
+
+  const addTemplate = (added: Template) => {
+    setCustomTemplates((templates) => [...templates, added])
+    setSelectedTemplateId(added.id)
+    setPanel("edit")
+  }
+
+  const createTemplate = () => {
+    addTemplate({
+      id: `custom-${crypto.randomUUID()}`,
+      name: "New template",
+      colors: { background: "#ffffff", date: "#000000", title: "#2e2e2c", subtitle: "#81807d", footer: "#413f3f" },
+      logos: [],
+      custom: true,
+    })
+  }
+
+  const duplicateTemplate = () => {
+    const copy: Template = {
+      ...structuredClone(template),
+      id: `custom-${crypto.randomUUID()}`,
+      name: `${template.name} (copy)`,
+      custom: true,
+    }
+    if (subtitleDefaults[template.id]) setSubtitleDefaults((defaults) => ({ ...defaults, [copy.id]: defaults[template.id] }))
+    addTemplate(copy)
+  }
+
+  const updateTemplate = (updated: Template) => {
+    setCustomTemplates((templates) => templates.map((t) => (t.id === updated.id ? updated : t)))
+  }
+
+  const deleteTemplate = () => {
+    if (!confirm(`Delete the template "${template.name}"?`)) return
+    setCustomTemplates((templates) => templates.filter((t) => t.id !== template.id))
+    saveSubtitleDefault(undefined)
+    selectTemplate(builtInTemplates[0].id)
   }
 
   return (
@@ -59,19 +101,21 @@ const App = () => {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label>Template</Label>
-                <Select value={template.id} onValueChange={selectTemplate}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {builtInTemplates.map((template) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <TemplatePicker
+                  builtInTemplates={builtInTemplates}
+                  customTemplates={customTemplates}
+                  selected={template}
+                  onSelect={selectTemplate}
+                  onCreate={createTemplate}
+                  onDuplicate={duplicateTemplate}
+                  onEdit={() => setPanel(panel === "edit" ? undefined : "edit")}
+                  onDelete={deleteTemplate}
+                />
               </div>
+
+              {panel === "edit" && template.custom && (
+                <TemplateEditor template={template} onChange={updateTemplate} onClose={() => setPanel(undefined)} />
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>

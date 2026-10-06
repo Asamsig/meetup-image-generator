@@ -23,4 +23,6 @@ export type Template = {
   footer?: string
   /** Colored bands along the bottom edge, drawn left to right. */
   stripes?: string[]
+  /** Created by the user and stored in local storage. */
+  custom?: boolean
 }

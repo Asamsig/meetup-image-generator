@@ -38,7 +38,8 @@ export const PosterPreview = ({ template, content }: PosterPreviewProps) => {
 
   const handleDownload = async () => {
     if (!svg) return
-    const filename = [template.id, format(content.date, "yyyy-MM-dd"), slugify(content.title).slice(0, 60).replace(/-$/, "")]
+    const name = template.custom ? slugify(template.name) : template.id
+    const filename = [name, format(content.date, "yyyy-MM-dd"), slugify(content.title).slice(0, 60).replace(/-$/, "")]
       .filter(Boolean)
       .join("-")
 
